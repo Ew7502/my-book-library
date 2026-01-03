@@ -33,7 +33,3 @@ document.getElementById("searchButton").addEventListener("click", function() {
       document.getElementById("results").innerHTML = "<p>Error fetching books.</p>";
     });
 });
-
-      document.getElementById("results").innerHTML = "<p>Error fetching books.</p>";
-    });
-});
