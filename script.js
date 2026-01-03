@@ -16,6 +16,9 @@ const listColors = {
   "Read": "#dda0dd"          // light purple
 };
 
+// Keep track of the current active filter
+let currentFilter = "All";
+
 // === Search books ===
 document.getElementById("searchButton").addEventListener("click", function() {
   let query = document.getElementById("searchInput").value.trim();
@@ -74,18 +77,20 @@ document.getElementById("searchButton").addEventListener("click", function() {
           }
         });
 
-        // === List selector saves and changes color ===
+        // === List selector saves, changes color, and applies filter ===
         let selector = bookDiv.querySelector(".listSelector");
         selector.addEventListener("change", function() {
           savedLists[bookId] = selector.value;
           localStorage.setItem("bookLists", JSON.stringify(savedLists));
           bookDiv.style.backgroundColor = listColors[selector.value];
 
-          // Reapply current filter so the card hides/shows automatically
-          const activeFilter = document.querySelector(".filterButton.active");
-          if (activeFilter) activeFilter.click();
+          // Reapply current filter
+          applyFilter(currentFilter);
         });
       });
+
+      // Apply current filter after new search
+      applyFilter(currentFilter);
     })
     .catch(err => {
       console.error(err);
@@ -97,14 +102,26 @@ document.getElementById("searchButton").addEventListener("click", function() {
 document.querySelectorAll(".filterButton").forEach(button => {
   button.addEventListener("click", () => {
     const listName = button.getAttribute("data-list");
+    currentFilter = listName;
 
-    // Highlight the active filter
+    // Highlight active filter
     document.querySelectorAll(".filterButton").forEach(btn => btn.classList.remove("active"));
     button.classList.add("active");
 
-    // Show/hide books based on selected list
-    document.querySelectorAll(".book").forEach(book => {
-      const selector = book.querySelector(".listSelector");
-      const bookList = selector.value;
-      if (listName === "All" || bookList === listName) {
-        book.style.
+    // Apply filter
+    applyFilter(listName);
+  });
+});
+
+// === Apply filter function ===
+function applyFilter(listName) {
+  document.querySelectorAll(".book").forEach(book => {
+    const selector = book.querySelector(".listSelector");
+    const bookList = selector.value;
+    if (listName === "All" || bookList === listName) {
+      book.style.display = "block";
+    } else {
+      book.style.display = "none";
+    }
+  });
+}
