@@ -4,10 +4,18 @@ function getStars(rating) {
   return "★".repeat(rating) + "☆".repeat(5 - rating);
 }
 
-// Load saved ratings from LocalStorage
+// Load saved ratings and lists from LocalStorage
 let savedRatings = JSON.parse(localStorage.getItem("bookRatings") || "{}");
+let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
 
-// Event listener for search button
+// Mapping list names to colors
+const listColors = {
+  "None": "#fff8dc",       // default pale cream
+  "Want to Read": "#add8e6", // light blue
+  "Reading": "#90ee90",      // light green
+  "Read": "#dda0dd"          // light purple
+};
+
 document.getElementById("searchButton").addEventListener("click", function() {
   let query = document.getElementById("searchInput").value.trim();
   if (!query) return;
@@ -28,25 +36,31 @@ document.getElementById("searchButton").addEventListener("click", function() {
         let cover = book.imageLinks ? book.imageLinks.thumbnail : "";
         let bookId = item.id; // unique ID for this book
         let rating = savedRatings[bookId] || 0;
+        let list = savedLists[bookId] || "None";
 
-        // Create container for each book
+        // Create book card
         let bookDiv = document.createElement("div");
-        bookDiv.style.marginBottom = "20px";
-        bookDiv.style.borderBottom = "1px solid #ccc";
-        bookDiv.style.paddingBottom = "10px";
+        bookDiv.className = "book";
+        bookDiv.style.backgroundColor = listColors[list];
 
         bookDiv.innerHTML = `
-          <img src="${cover}" alt="Cover" style="width:100px; display:block; margin-bottom:5px;">
+          <img src="${cover}" alt="Cover">
           <strong>${book.title}</strong><br>
           by ${book.authors ? book.authors.join(", ") : "Unknown"}<br>
-          Your rating: <span class="stars">${getStars(rating)}</span>
+          Your rating: <span class="stars">${getStars(rating)}</span><br><br>
+          List: 
+          <select class="listSelector">
+            <option${list === "None" ? " selected" : ""}>None</option>
+            <option${list === "Want to Read" ? " selected" : ""}>Want to Read</option>
+            <option${list === "Reading" ? " selected" : ""}>Reading</option>
+            <option${list === "Read" ? " selected" : ""}>Read</option>
+          </select>
         `;
 
         resultsDiv.appendChild(bookDiv);
 
-        // Make the stars clickable
+        // Make stars clickable
         let starsSpan = bookDiv.querySelector(".stars");
-        starsSpan.style.cursor = "pointer";
         starsSpan.addEventListener("click", function() {
           let newRating = prompt("Enter your rating (1-5):");
           newRating = parseInt(newRating);
@@ -57,6 +71,14 @@ document.getElementById("searchButton").addEventListener("click", function() {
           } else {
             alert("Please enter a number between 1 and 5");
           }
+        });
+
+        // Make list selector saveable and color-coded
+        let selector = bookDiv.querySelector(".listSelector");
+        selector.addEventListener("change", function() {
+          savedLists[bookId] = selector.value;
+          localStorage.setItem("bookLists", JSON.stringify(savedLists));
+          bookDiv.style.backgroundColor = listColors[selector.value];
         });
       });
     })
