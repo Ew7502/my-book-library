@@ -1,204 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Bright Book Library</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom right, #cceeff, #ffe0cc);
-      color: #333;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #ff5733;
-    }
-
-    p {
-      text-align: center;
-      font-size: 1.1em;
-    }
-
-    #searchContainer {
-      text-align:center;
-      margin-bottom:10px;
-      position: relative;
-    }
-
-    #searchInput {
-      width: 60%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 2px solid #ff5733;
-      font-size: 1em;
-    }
-
-    #searchButton {
-      padding: 10px 20px;
-      border-radius: 10px;
-      border: none;
-      background-color: #ff7f50;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      margin-left: 10px;
-      font-weight: bold;
-    }
-
-    #searchButton:hover {
-      background-color: #ff4500;
-    }
-
-    /* Autocomplete suggestions */
-    #suggestions {
-      position: absolute;
-      left: 20%;
-      right: 20%;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 10;
-    }
-
-    #suggestions div {
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-
-    #suggestions div:hover {
-      background-color: #ffefc1;
-    }
-
-    /* Filter buttons */
-    .filterButton {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 8px;
-      margin: 0 5px;
-      cursor: pointer;
-      font-weight: bold;
-      background-color: #ffd700;
-    }
-
-    .filterButton:hover {
-      background-color: #ffc107;
-    }
-
-    .filterButton.active {
-      background-color: #ffb300;
-    }
-
-    /* Sort dropdown */
-    #sortContainer {
-      text-align:center;
-      margin-top: 10px;
-    }
-
-    #sortSelect {
-      padding: 5px 10px;
-      font-weight: bold;
-      border-radius: 6px;
-    }
-
-    /* Results container */
-    #results {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    /* Book cards */
-    .book {
-      background-color: #fff8dc;
-      border-radius: 15px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      padding: 15px;
-      width: 200px;
-      text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-    }
-
-    .book:hover {
-      transform: scale(1.08);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-    }
-
-    .book img {
-      width: 120px;
-      height: auto;
-      margin-bottom: 10px;
-      border-radius: 8px;
-    }
-
-    .stars {
-      font-size: 1.4em;
-      color: #ffcc00;
-      cursor: pointer;
-    }
-
-    .listSelector {
-      margin-top: 5px;
-      padding: 4px;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-
-    .heart {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 1.5em;
-      cursor: pointer;
-      color: #ccc;
-      transition: color 0.2s;
-    }
-
-    .heart.fav {
-      color: #ff4444;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>My Book Shelf</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>📚 My Bright Book Library 📚</h1>
-  <p>Search for any book and rate it!</p>
 
-  <!-- Search -->
-  <div id="searchContainer">
-    <input type="text" id="searchInput" placeholder="Search for a book...">
-    <button id="searchButton">Search</button>
-    <div id="suggestions"></div>
+  <h1>📚 My Book Shelf</h1>
+
+  <div class="search-area">
+    <input id="searchInput" type="text" placeholder="Search for a book..." />
+    <button id="searchBtn">Search</button>
   </div>
 
-  <!-- Filter buttons -->
-  <div style="text-align:center; margin-bottom:10px;">
-    <button class="filterButton" data-list="Want to Read">Want to Read</button>
-    <button class="filterButton" data-list="Reading">Reading</button>
-    <button class="filterButton" data-list="Read">Read</button>
-    <button class="filterButton" data-list="Favourites">💖 Favourites</button>
+  <div class="list-buttons">
+    <button onclick="showList('All')">All</button>
+    <button onclick="showList('Want to Read')">Want to Read</button>
+    <button onclick="showList('Reading')">Reading</button>
+    <button onclick="showList('Read')">Read</button>
+    <button onclick="showList('Favourites')">❤️ Favourites</button>
   </div>
 
-  <!-- Sort -->
-  <div id="sortContainer">
-    Sort by: 
-    <select id="sortSelect">
-      <option value="title">Title (A-Z)</option>
-    </select>
-  </div>
-
-  <!-- Results -->
-  <div id="results"></div>
+  <div id="books"></div>
 
   <script src="script.js"></script>
 </body>
 </html>
-
-
-
 
