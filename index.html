@@ -1,13 +1,96 @@
-<body>
-  <h1>My Private Book Library</h1>
-  <p>This is where I keep track of my books.</p>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Book Library</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #fff8f0;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
 
-  <!-- Search bar -->
-  <input type="text" id="searchInput" placeholder="Search for a book...">
-  <button id="searchButton">Search</button>
+      h1 {
+        text-align: center;
+        color: #ff6f61;
+      }
 
-  <!-- Results will show here -->
-  <div id="results"></div>
+      p {
+        text-align: center;
+        font-size: 1.1em;
+      }
 
-  <script src="script.js"></script>
-</body>
+      #searchInput {
+        width: 60%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+      }
+
+      #searchButton {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        background-color: #ff6f61;
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      #searchButton:hover {
+        background-color: #ff3b2f;
+      }
+
+      #results {
+        margin-top: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .book {
+        background-color: #fff3e0;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 15px;
+        width: 200px;
+        text-align: center;
+        transition: transform 0.2s;
+      }
+
+      .book:hover {
+        transform: scale(1.05);
+      }
+
+      .book img {
+        width: 120px;
+        height: auto;
+        margin-bottom: 10px;
+        border-radius: 5px;
+      }
+
+      .stars {
+        font-size: 1.2em;
+        color: #ffb400;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📚 My Cozy Book Library 📚</h1>
+    <p>Search for any book and rate it!</p>
+
+    <div style="text-align:center;">
+      <input type="text" id="searchInput" placeholder="Search for a book...">
+      <button id="searchButton">Search</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
