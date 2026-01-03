@@ -7,8 +7,8 @@ function getStars(rating) {
 // Load saved ratings and lists
 let savedRatings = JSON.parse(localStorage.getItem("bookRatings") || "{}");
 let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
+let savedBooks = JSON.parse(localStorage.getItem("bookData") || "{}"); // store book info
 
-// List colors
 const listColors = {
   "None": "#fff8dc",
   "Want to Read": "#add8e6",
@@ -16,14 +16,10 @@ const listColors = {
   "Read": "#dda0dd"
 };
 
-// Track current active filter
-let currentFilter = "All";
+const resultsDiv = document.getElementById("results");
 
-// === Create book card ===
-function createBookCard(book, bookId, container) {
-  // Prevent duplicate cards
-  if (document.getElementById("book-" + bookId)) return;
-
+// === Create a book card ===
+function createBookCard(book, bookId) {
   let rating = savedRatings[bookId] || 0;
   let list = savedLists[bookId] || "None";
 
@@ -46,28 +42,24 @@ function createBookCard(book, bookId, container) {
     </select>
   `;
 
-  container.appendChild(bookDiv);
+  resultsDiv.appendChild(bookDiv);
 
-  // Stars click to set rating
-  let starsSpan = bookDiv.querySelector(".stars");
-  starsSpan.addEventListener("click", () => {
+  // Click stars to rate
+  bookDiv.querySelector(".stars").addEventListener("click", () => {
     let newRating = parseInt(prompt("Enter your rating (1-5):"));
     if (newRating >= 1 && newRating <= 5) {
       savedRatings[bookId] = newRating;
       localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
-      starsSpan.textContent = getStars(newRating);
+      bookDiv.querySelector(".stars").textContent = getStars(newRating);
     }
   });
 
-  // Dropdown change
+  // Change list dropdown
   let selector = bookDiv.querySelector(".listSelector");
   selector.addEventListener("change", () => {
     savedLists[bookId] = selector.value;
     localStorage.setItem("bookLists", JSON.stringify(savedLists));
     bookDiv.style.backgroundColor = listColors[selector.value];
-
-    // Reapply filter
-    applyFilter(currentFilter);
   });
 }
 
@@ -76,8 +68,7 @@ function searchBooks() {
   let query = document.getElementById("searchInput").value.trim();
   if (!query) return;
 
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = ""; // Clear previous results
+  resultsDiv.innerHTML = ""; // CLEAR previous search results
 
   fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
     .then(res => res.json())
@@ -91,14 +82,16 @@ function searchBooks() {
         let book = item.volumeInfo;
         let bookId = item.id;
 
-        createBookCard({
+        // Save book info in case you want persistence later
+        savedBooks[bookId] = {
           title: book.title,
           authors: book.authors || ["Unknown"],
           cover: book.imageLinks ? book.imageLinks.thumbnail : ""
-        }, bookId, resultsDiv);
-      });
+        };
+        localStorage.setItem("bookData", JSON.stringify(savedBooks));
 
-      applyFilter(currentFilter); // Keep filter applied
+        createBookCard(savedBooks[bookId], bookId);
+      });
     })
     .catch(err => {
       console.error(err);
@@ -106,39 +99,9 @@ function searchBooks() {
     });
 }
 
-// === Apply filter ===
-function applyFilter(listName) {
-  currentFilter = listName;
-
-  // Highlight active button
-  document.querySelectorAll(".filterButton").forEach(btn => {
-    btn.classList.toggle("active", btn.getAttribute("data-list") === listName);
-  });
-
-  // Show/hide cards
-  document.querySelectorAll(".book").forEach(book => {
-    const selector = book.querySelector(".listSelector");
-    const bookList = selector.value;
-    if (listName === "All" || bookList === listName) {
-      book.style.display = "block";
-    } else {
-      book.style.display = "none";
-    }
-  });
-}
-
 // === Event listeners ===
 document.getElementById("searchButton").addEventListener("click", searchBooks);
 
 document.getElementById("searchInput").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    searchBooks();
-  }
+  if (e.key === "Enter") searchBooks();
 });
-
-document.querySelectorAll(".filterButton").forEach(btn => {
-  btn.addEventListener("click", () => {
-    applyFilter(btn.getAttribute("data-list"));
-  });
-});
-
