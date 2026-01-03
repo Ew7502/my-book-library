@@ -5,7 +5,7 @@
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #cceeff; 
+        background: #cceeff; /* soft sky blue */
         color: #333;
         margin: 0;
         padding: 20px;
@@ -13,7 +13,7 @@
 
       h1 {
         text-align: center;
-        color: #ff5733;
+        color: #ff5733; /* vibrant coral-orange */
       }
 
       p {
@@ -21,6 +21,7 @@
         font-size: 1.1em;
       }
 
+      /* Search bar */
       #searchInput {
         width: 60%;
         padding: 10px;
@@ -33,7 +34,7 @@
         padding: 10px 20px;
         border-radius: 10px;
         border: none;
-        background-color: #ff7f50; 
+        background-color: #ff7f50; /* bright orange */
         color: white;
         font-size: 1em;
         cursor: pointer;
@@ -45,25 +46,7 @@
         background-color: #ff4500;
       }
 
-      /* Filter buttons */
-      .filterButton {
-        padding: 8px 15px;
-        border: none;
-        border-radius: 8px;
-        margin: 0 5px;
-        cursor: pointer;
-        font-weight: bold;
-        background-color: #ffd700; 
-      }
-
-      .filterButton.active {
-        background-color: #ffc107;
-      }
-
-      .filterButton:hover {
-        background-color: #ffc107;
-      }
-
+      /* Results container */
       #results {
         margin-top: 20px;
         display: flex;
@@ -72,8 +55,9 @@
         gap: 20px;
       }
 
+      /* Book cards */
       .book {
-        background-color: #fff8dc;
+        background-color: #fff8dc; /* default pale cream */
         border-radius: 15px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         padding: 15px;
@@ -96,7 +80,7 @@
 
       .stars {
         font-size: 1.4em;
-        color: #ffcc00; 
+        color: #ffcc00; /* bright gold */
         cursor: pointer;
       }
 
@@ -118,18 +102,12 @@
       <button id="searchButton">Search</button>
     </div>
 
-    <!-- Filter buttons -->
-    <div style="text-align:center; margin-bottom:20px;">
-      <button class="filterButton active" data-list="All">All</button>
-      <button class="filterButton" data-list="Want to Read">Want to Read</button>
-      <button class="filterButton" data-list="Reading">Reading</button>
-      <button class="filterButton" data-list="Read">Read</button>
-    </div>
-
-    <!-- Results -->
+    <!-- Results show up here -->
     <div id="results"></div>
 
+    <!-- Link to JavaScript -->
     <script src="script.js"></script>
   </body>
 </html>
+
 
