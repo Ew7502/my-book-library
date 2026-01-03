@@ -1,13 +1,3 @@
-// Helper function: convert rating number to stars
-function getStars(rating) {
-  if (!rating) return "☆☆☆☆☆"; // empty stars if no rating
-  let fullStars = Math.floor(rating); // number of full stars
-  let halfStar = rating % 1 >= 0.5 ? 1 : 0; // half star if needed
-  let emptyStars = 5 - fullStars - halfStar;
-
-  return "★".repeat(fullStars) + (halfStar ? "½" : "") + "☆".repeat(emptyStars);
-}
-
 // Event listener for search button
 document.getElementById("searchButton").addEventListener("click", function() {
   let query = document.getElementById("searchInput").value.trim();
@@ -26,7 +16,6 @@ document.getElementById("searchButton").addEventListener("click", function() {
 
       data.items.forEach(item => {
         let book = item.volumeInfo;
-        let rating = book.averageRating || 0;
         let cover = book.imageLinks ? book.imageLinks.thumbnail : "";
 
         resultsDiv.innerHTML += `
@@ -34,7 +23,6 @@ document.getElementById("searchButton").addEventListener("click", function() {
             <img src="${cover}" alt="Cover" style="width:100px; display:block; margin-bottom:5px;">
             <strong>${book.title}</strong><br>
             by ${book.authors ? book.authors.join(", ") : "Unknown"}<br>
-            Internet rating: ${getStars(rating)}<br>
             Your rating: ☆☆☆☆☆
           </div>
         `;
@@ -42,6 +30,10 @@ document.getElementById("searchButton").addEventListener("click", function() {
     })
     .catch(err => {
       console.error(err);
+      document.getElementById("results").innerHTML = "<p>Error fetching books.</p>";
+    });
+});
+
       document.getElementById("results").innerHTML = "<p>Error fetching books.</p>";
     });
 });
