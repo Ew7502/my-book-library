@@ -18,8 +18,14 @@ const listColors = {
 
 const resultsDiv = document.getElementById("results");
 
+// Track current filter
+let currentFilter = "All";
+
 // === Create a book card ===
 function createBookCard(book, bookId) {
+  // Prevent duplicate cards
+  if (document.getElementById("book-" + bookId)) return;
+
   let rating = savedRatings[bookId] || 0;
   let list = savedLists[bookId] || "None";
 
@@ -60,6 +66,8 @@ function createBookCard(book, bookId) {
     savedLists[bookId] = selector.value;
     localStorage.setItem("bookLists", JSON.stringify(savedLists));
     bookDiv.style.backgroundColor = listColors[selector.value];
+
+    applyFilter(currentFilter); // reapply filter after change
   });
 }
 
@@ -82,7 +90,7 @@ function searchBooks() {
         let book = item.volumeInfo;
         let bookId = item.id;
 
-        // Save book info in case you want persistence later
+        // Save book info
         savedBooks[bookId] = {
           title: book.title,
           authors: book.authors || ["Unknown"],
@@ -92,6 +100,8 @@ function searchBooks() {
 
         createBookCard(savedBooks[bookId], bookId);
       });
+
+      applyFilter(currentFilter); // Apply current filter
     })
     .catch(err => {
       console.error(err);
@@ -99,9 +109,36 @@ function searchBooks() {
     });
 }
 
+// === Apply filter on currently displayed search results ===
+function applyFilter(listName) {
+  currentFilter = listName;
+
+  // Highlight active button
+  document.querySelectorAll(".filterButton").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-list") === listName);
+  });
+
+  // Show/hide cards
+  document.querySelectorAll(".book").forEach(book => {
+    const selector = book.querySelector(".listSelector");
+    const bookList = selector.value;
+    if (listName === "All" || bookList === listName) {
+      book.style.display = "block";
+    } else {
+      book.style.display = "none";
+    }
+  });
+}
+
 // === Event listeners ===
 document.getElementById("searchButton").addEventListener("click", searchBooks);
-
 document.getElementById("searchInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") searchBooks();
+});
+
+// Filter buttons
+document.querySelectorAll(".filterButton").forEach(btn => {
+  btn.addEventListener("click", () => {
+    applyFilter(btn.getAttribute("data-list"));
+  });
 });
