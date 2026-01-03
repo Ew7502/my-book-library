@@ -1,166 +1,153 @@
-function getStars(rating) {
-  rating = rating || 0;
-  return "★".repeat(rating) + "☆".repeat(5 - rating);
-}
+const booksDiv = document.getElementById("books");
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
 
-// Load saved data
-let savedRatings = JSON.parse(localStorage.getItem("bookRatings") || "{}");
-let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
-let savedBooks = JSON.parse(localStorage.getItem("bookData") || "{}");
-let savedFavourites = JSON.parse(localStorage.getItem("bookFavourites") || "{}");
+let allBooks = [];
+
+// Stored data
+let savedLists = JSON.parse(localStorage.getItem("bookLists")) || {};
+let savedRatings = JSON.parse(localStorage.getItem("bookRatings")) || {};
+let savedFavourites = JSON.parse(localStorage.getItem("bookFavourites")) || {};
 
 const listColors = {
-  "None": "#fff8dc",
-  "Want to Read": "#add8e6",
-  "Reading": "#90ee90",
-  "Read": "#dda0dd",
-  "Favourites": "#ffe0e0"
+  "None": "#ffffff",
+  "Want to Read": "#fff3b0",
+  "Reading": "#caffbf",
+  "Read": "#bdb2ff",
+  "Favourites": "#ffd6e8"
 };
 
-const resultsDiv = document.getElementById("results");
-const suggestionsDiv = document.getElementById("suggestions");
-const searchInput = document.getElementById("searchInput");
-const sortSelect = document.getElementById("sortSelect");
+// Search (button + Enter)
+searchBtn.addEventListener("click", searchBooks);
+searchInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") searchBooks();
+});
 
-let currentFilter = null; // null = search results
+function searchBooks() {
+  const query = searchInput.value.trim();
+  if (!query) return;
+
+  booksDiv.innerHTML = "";
+  allBooks = [];
+
+  fetch(`https://openlibrary.org/search.json?q=${query}`)
+    .then(res => res.json())
+    .then(data => {
+      data.docs.slice(0, 10).forEach(book => {
+        createBookCard(book);
+      });
+    });
+}
 
 // Create book card
-function createBookCard(book, bookId) {
-  if (document.getElementById("book-" + bookId)) return;
+function createBookCard(book) {
+  const bookId = book.key;
+  allBooks.push(book);
 
-  let rating = savedRatings[bookId] || 0;
-  let list = savedLists[bookId] || "None";
-  let isFav = savedFavourites[bookId] || false;
+  const bookDiv = document.createElement("div");
+  bookDiv.className = "book-card";
 
-  let bookDiv = document.createElement("div");
-  bookDiv.className = "book";
-  bookDiv.id = "book-" + bookId;
-  bookDiv.style.backgroundColor = listColors[list];
+  const title = book.title || "Unknown title";
+  const author = book.author_name ? book.author_name[0] : "Unknown author";
+
+  const cover = book.cover_i
+    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+    : "https://via.placeholder.com/150x220?text=No+Cover";
+
+  const currentList = savedLists[bookId] || "None";
+  const currentRating = savedRatings[bookId] || 0;
+  const isFav = savedFavourites[bookId] || false;
+
+  bookDiv.style.backgroundColor = listColors[currentList];
 
   bookDiv.innerHTML = `
-    <div class="heart ${isFav ? 'fav' : ''}">❤️</div>
-    <img src="${book.cover}" alt="Cover">
-    <strong>${book.title}</strong><br>
-    by ${book.authors.join(", ")}<br>
-    Your rating: <span class="stars">${getStars(rating)}</span><br><br>
-    List: 
-    <select class="listSelector">
-      <option${list === "None" ? " selected" : ""}>None</option>
-      <option${list === "Want to Read" ? " selected" : ""}>Want to Read</option>
-      <option${list === "Reading" ? " selected" : ""}>Reading</option>
-      <option${list === "Read" ? " selected" : ""}>Read</option>
+    <span class="heart ${isFav ? "fav" : ""}">❤</span>
+    <img src="${cover}">
+    <h3>${title}</h3>
+    <p>${author}</p>
+
+    <div class="stars">
+      ${[1,2,3,4,5].map(n =>
+        `<span class="star ${currentRating >= n ? "filled" : ""}" data-star="${n}">★</span>`
+      ).join("")}
+    </div>
+
+    <select class="list-select">
+      <option>None</option>
+      <option>Want to Read</option>
+      <option>Reading</option>
+      <option>Read</option>
+      <option>Favourites</option>
     </select>
   `;
 
-  resultsDiv.appendChild(bookDiv);
+  booksDiv.appendChild(bookDiv);
 
-  // Rate
-  bookDiv.querySelector(".stars").addEventListener("click", () => {
-    let newRating = parseInt(prompt("Enter your rating (1-5):"));
-    if (newRating >= 1 && newRating <= 5) {
-      savedRatings[bookId] = newRating;
-      localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
-      bookDiv.querySelector(".stars").textContent = getStars(newRating);
-    }
-  });
+  // Dropdown
+  const selector = bookDiv.querySelector(".list-select");
+  selector.value = currentList;
 
-  // Change list
-  let selector = bookDiv.querySelector(".listSelector");
   selector.addEventListener("change", () => {
     savedLists[bookId] = selector.value;
     localStorage.setItem("bookLists", JSON.stringify(savedLists));
+
+    if (selector.value === "Favourites") {
+      savedFavourites[bookId] = true;
+    } else {
+      savedFavourites[bookId] = false;
+    }
+
+    localStorage.setItem("bookFavourites", JSON.stringify(savedFavourites));
+    heart.classList.toggle("fav", savedFavourites[bookId]);
     bookDiv.style.backgroundColor = listColors[selector.value];
   });
 
-  // Favourite heart
-  let heart = bookDiv.querySelector(".heart");
+  // Stars
+  bookDiv.querySelectorAll(".star").forEach(star => {
+    star.addEventListener("click", () => {
+      const rating = star.dataset.star;
+      savedRatings[bookId] = rating;
+      localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
+      createBookCardRefresh();
+    });
+  });
+
+  // Heart
+  const heart = bookDiv.querySelector(".heart");
   heart.addEventListener("click", () => {
     savedFavourites[bookId] = !savedFavourites[bookId];
     localStorage.setItem("bookFavourites", JSON.stringify(savedFavourites));
+
+    if (savedFavourites[bookId]) {
+      savedLists[bookId] = "Favourites";
+      selector.value = "Favourites";
+      bookDiv.style.backgroundColor = listColors["Favourites"];
+    } else {
+      savedLists[bookId] = "None";
+      selector.value = "None";
+      bookDiv.style.backgroundColor = listColors["None"];
+    }
+
+    localStorage.setItem("bookLists", JSON.stringify(savedLists));
     heart.classList.toggle("fav", savedFavourites[bookId]);
   });
 }
 
-// Search books
-function searchBooks() {
-  let query = searchInput.value.trim();
-  if (!query) return;
-
-  resultsDiv.innerHTML = "";
-  currentFilter = null;
-
-  fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
-    .then(res => res.json())
-    .then(data => {
-      if (!data.items) {
-        resultsDiv.innerHTML = "<p>No books found.</p>";
-        return;
-      }
-
-      data.items.forEach(item => {
-        let book = item.volumeInfo;
-        let bookId = item.id;
-
-        savedBooks[bookId] = {
-          title: book.title,
-          authors: book.authors || ["Unknown"],
-          cover: book.imageLinks ? book.imageLinks.thumbnail : ""
-        };
-        localStorage.setItem("bookData", JSON.stringify(savedBooks));
-
-        createBookCard(savedBooks[bookId], bookId);
-      });
-
-      suggestionsDiv.innerHTML = "";
-    })
-    .catch(err => {
-      console.error(err);
-      resultsDiv.innerHTML = "<p>Error fetching books.</p>";
-    });
+// Refresh cards (for star updates)
+function createBookCardRefresh() {
+  booksDiv.innerHTML = "";
+  allBooks.forEach(book => createBookCard(book));
 }
 
-// Show list
+// List filters
 function showList(listName) {
-  resultsDiv.innerHTML = "";
-  currentFilter = listName;
+  booksDiv.innerHTML = "";
 
-  let booksArray = Object.keys(savedBooks).map(id => ({id, ...savedBooks[id]}));
-
-  if (listName === "Favourites") {
-    booksArray = booksArray.filter(b => savedFavourites[b.id]);
-  } else {
-    booksArray = booksArray.filter(b => savedLists[b.id] === listName);
-  }
-
-  // Sort by title
-  booksArray.sort((a,b) => a.title.localeCompare(b.title));
-
-  booksArray.forEach(b => createBookCard({title:b.title, authors:b.authors, cover:b.cover}, b.id));
-}
-
-// Live suggestions
-searchInput.addEventListener("input", () => {
-  let val = searchInput.value.toLowerCase();
-  suggestionsDiv.innerHTML = "";
-  if (!val) return;
-
-  let matches = Object.values(savedBooks).filter(b => b.title.toLowerCase().includes(val));
-  matches.slice(0,5).forEach(b => {
-    let div = document.createElement("div");
-    div.textContent = b.title;
-    div.addEventListener("click", () => {
-      searchInput.value = b.title;
-      suggestionsDiv.innerHTML = "";
-      searchBooks();
-    });
-    suggestionsDiv.appendChild(div);
+  allBooks.forEach(book => {
+    const id = book.key;
+    if (listName === "All" || savedLists[id] === listName) {
+      createBookCard(book);
+    }
   });
-});
-
-// Events
-document.getElementById("searchButton").addEventListener("click", searchBooks);
-searchInput.addEventListener("keypress", e => { if(e.key==="Enter") searchBooks(); });
-document.querySelectorAll(".filterButton").forEach(btn => {
-  btn.addEventListener("click", () => showList(btn.getAttribute("data-list")));
-});
+}
 
