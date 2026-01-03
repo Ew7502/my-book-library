@@ -6,7 +6,7 @@
       /* ===== Body & fonts ===== */
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #cceeff; /* soft sky blue background */
+        background: #cceeff; /* soft sky blue */
         color: #333;
         margin: 0;
         padding: 20px;
@@ -44,7 +44,7 @@
       }
 
       #searchButton:hover {
-        background-color: #ff4500; /* darker orange on hover */
+        background-color: #ff4500;
       }
 
       /* ===== Filter buttons ===== */
@@ -55,11 +55,15 @@
         margin: 0 5px;
         cursor: pointer;
         font-weight: bold;
-        background-color: #ffd700; /* golden yellow */
+        background-color: #ffd700; /* gold */
+      }
+
+      .filterButton.active {
+        background-color: #ffc107; /* darker gold */
       }
 
       .filterButton:hover {
-        background-color: #ffc107; /* darker gold */
+        background-color: #ffc107;
       }
 
       /* ===== Results container ===== */
@@ -96,7 +100,7 @@
 
       .stars {
         font-size: 1.4em;
-        color: #ffcc00; /* bright gold stars */
+        color: #ffcc00; /* bright gold */
         cursor: pointer;
       }
 
@@ -120,7 +124,7 @@
 
     <!-- Filter buttons -->
     <div style="text-align:center; margin-bottom:20px;">
-      <button class="filterButton" data-list="All">All</button>
+      <button class="filterButton active" data-list="All">All</button>
       <button class="filterButton" data-list="Want to Read">Want to Read</button>
       <button class="filterButton" data-list="Reading">Reading</button>
       <button class="filterButton" data-list="Read">Read</button>
