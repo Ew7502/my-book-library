@@ -7,68 +7,54 @@ function getStars(rating) {
 // Load saved ratings, lists, and book info from LocalStorage
 let savedRatings = JSON.parse(localStorage.getItem("bookRatings") || "{}");
 let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
-let savedBooks = JSON.parse(localStorage.getItem("bookData") || "{}"); // store title, author, cover
 
 // Mapping list names to colors
 const listColors = {
-  "None": "#fff8dc",         // pale cream
-  "Want to Read": "#add8e6", // light blue
-  "Reading": "#90ee90",      // light green
-  "Read": "#dda0dd"          // light purple
+  "None": "#fff8dc",
+  "Want to Read": "#add8e6",
+  "Reading": "#90ee90",
+  "Read": "#dda0dd"
 };
 
-// Keep track of the current active filter
-let currentFilter = "All";
-
-// === Display all saved books on page load ===
-window.addEventListener("load", () => {
-  const resultsDiv = document.getElementById("results");
-  for (let bookId in savedBooks) {
-    createBookCard(savedBooks[bookId], bookId, resultsDiv);
-  }
-});
-
-// === Search books ===
-document.getElementById("searchButton").addEventListener("click", function() {
+// === Search function ===
+function searchBooks() {
   let query = document.getElementById("searchInput").value.trim();
   if (!query) return;
 
-  fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
-    .then(response => response.json())
-    .then(data => {
-      if (!data.items) return;
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = ""; // Clear previous results each search
 
-      let resultsDiv = document.getElementById("results");
+  fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.items) {
+        resultsDiv.innerHTML = "<p>No books found.</p>";
+        return;
+      }
 
       data.items.forEach(item => {
         let book = item.volumeInfo;
         let bookId = item.id;
 
         // Save book info for persistence
-        savedBooks[bookId] = {
+        savedLists[bookId] = savedLists[bookId] || "None"; // Keep list if exists
+        savedRatings[bookId] = savedRatings[bookId] || 0;
+
+        createBookCard({
           title: book.title,
           authors: book.authors || ["Unknown"],
           cover: book.imageLinks ? book.imageLinks.thumbnail : ""
-        };
-        localStorage.setItem("bookData", JSON.stringify(savedBooks));
-
-        createBookCard(savedBooks[bookId], bookId, resultsDiv);
+        }, bookId, resultsDiv);
       });
-
-      // Apply current filter after new books are added
-      applyFilter(currentFilter);
     })
     .catch(err => {
       console.error(err);
-      document.getElementById("results").innerHTML = "<p>Error fetching books.</p>";
+      resultsDiv.innerHTML = "<p>Error fetching books.</p>";
     });
-});
+}
 
 // === Create a book card ===
 function createBookCard(book, bookId, container) {
-  // Prevent duplicate cards
-  if (document.getElementById("book-" + bookId)) return;
-
   let rating = savedRatings[bookId] || 0;
   let list = savedLists[bookId] || "None";
 
@@ -93,56 +79,33 @@ function createBookCard(book, bookId, container) {
 
   container.appendChild(bookDiv);
 
-  // === Clickable stars ===
+  // === Stars click ===
   let starsSpan = bookDiv.querySelector(".stars");
-  starsSpan.addEventListener("click", function() {
-    let newRating = prompt("Enter your rating (1-5):");
-    newRating = parseInt(newRating);
+  starsSpan.addEventListener("click", () => {
+    let newRating = parseInt(prompt("Enter your rating (1-5):"));
     if (newRating >= 1 && newRating <= 5) {
       savedRatings[bookId] = newRating;
       localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
       starsSpan.textContent = getStars(newRating);
-    } else {
-      alert("Please enter a number between 1 and 5");
     }
   });
 
-  // === List selector saves, changes color, and applies filter ===
+  // === Dropdown change ===
   let selector = bookDiv.querySelector(".listSelector");
-  selector.addEventListener("change", function() {
+  selector.addEventListener("change", () => {
     savedLists[bookId] = selector.value;
     localStorage.setItem("bookLists", JSON.stringify(savedLists));
     bookDiv.style.backgroundColor = listColors[selector.value];
-
-    // Reapply current filter
-    applyFilter(currentFilter);
   });
 }
 
-// === Filter buttons ===
-document.querySelectorAll(".filterButton").forEach(button => {
-  button.addEventListener("click", () => {
-    const listName = button.getAttribute("data-list");
-    currentFilter = listName;
+// === Search by button click ===
+document.getElementById("searchButton").addEventListener("click", searchBooks);
 
-    // Highlight active filter
-    document.querySelectorAll(".filterButton").forEach(btn => btn.classList.remove("active"));
-    button.classList.add("active");
-
-    applyFilter(listName);
-  });
+// === Search by pressing Enter key ===
+document.getElementById("searchInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    searchBooks();
+  }
 });
-
-// === Apply filter function ===
-function applyFilter(listName) {
-  document.querySelectorAll(".book").forEach(book => {
-    const selector = book.querySelector(".listSelector");
-    const bookList = selector.value;
-    if (listName === "All" || bookList === listName) {
-      book.style.display = "block";
-    } else {
-      book.style.display = "none";
-    }
-  });
-}
 
