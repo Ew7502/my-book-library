@@ -1,12 +1,14 @@
+// Helper function: convert rating number to stars
 function getStars(rating) {
   rating = rating || 0;
   return "★".repeat(rating) + "☆".repeat(5 - rating);
 }
 
+// Load saved ratings, lists, and book info from LocalStorage
 let savedRatings = JSON.parse(localStorage.getItem("bookRatings") || "{}");
 let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
-let savedBooks = JSON.parse(localStorage.getItem("bookData") || "{}");
 
+// Mapping list names to colors
 const listColors = {
   "None": "#fff8dc",
   "Want to Read": "#add8e6",
@@ -14,15 +16,45 @@ const listColors = {
   "Read": "#dda0dd"
 };
 
-const resultsDiv = document.getElementById("results");
+// === Search function ===
+function searchBooks() {
+  let query = document.getElementById("searchInput").value.trim();
+  if (!query) return;
 
-// Track current view (list filter)
-let currentFilter = null; // null = search results
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = ""; // Clear previous results each search
 
-// Create a book card
-function createBookCard(book, bookId) {
-  if (document.getElementById("book-" + bookId)) return;
+  fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.items) {
+        resultsDiv.innerHTML = "<p>No books found.</p>";
+        return;
+      }
 
+      data.items.forEach(item => {
+        let book = item.volumeInfo;
+        let bookId = item.id;
+
+        // Save book info for persistence
+        savedLists[bookId] = savedLists[bookId] || "None"; // Keep list if exists
+        savedRatings[bookId] = savedRatings[bookId] || 0;
+
+        createBookCard({
+          title: book.title,
+          authors: book.authors || ["Unknown"],
+          cover: book.imageLinks ? book.imageLinks.thumbnail : ""
+        }, bookId, resultsDiv);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      resultsDiv.innerHTML = "<p>Error fetching books.</p>";
+    });
+}
+
+// === Create a book card ===
+function createBookCard(book, bookId, container) {
   let rating = savedRatings[bookId] || 0;
   let list = savedLists[bookId] || "None";
 
@@ -45,19 +77,35 @@ function createBookCard(book, bookId) {
     </select>
   `;
 
-  resultsDiv.appendChild(bookDiv);
+  container.appendChild(bookDiv);
 
-  // Click stars to rate
-  bookDiv.querySelector(".stars").addEventListener("click", () => {
+  // === Stars click ===
+  let starsSpan = bookDiv.querySelector(".stars");
+  starsSpan.addEventListener("click", () => {
     let newRating = parseInt(prompt("Enter your rating (1-5):"));
     if (newRating >= 1 && newRating <= 5) {
       savedRatings[bookId] = newRating;
       localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
-      bookDiv.querySelector(".stars").textContent = getStars(newRating);
+      starsSpan.textContent = getStars(newRating);
     }
   });
 
-  // List dropdown change
+  // === Dropdown change ===
   let selector = bookDiv.querySelector(".listSelector");
   selector.addEventListener("change", () => {
-    savedLists[bo]()
+    savedLists[bookId] = selector.value;
+    localStorage.setItem("bookLists", JSON.stringify(savedLists));
+    bookDiv.style.backgroundColor = listColors[selector.value];
+  });
+}
+
+// === Search by button click ===
+document.getElementById("searchButton").addEventListener("click", searchBooks);
+
+// === Search by pressing Enter key ===
+document.getElementById("searchInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    searchBooks();
+  }
+});
+
