@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My Book Library</title>
+    <title>My Bright Book Library</title>
     <style>
+      /* ===== Body & fonts ===== */
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #fff8f0;
+        background: #fff3cc; /* bright warm yellow */
         color: #333;
         margin: 0;
         padding: 20px;
@@ -13,37 +14,41 @@
 
       h1 {
         text-align: center;
-        color: #ff6f61;
+        color: #ff5733; /* vibrant coral-orange */
       }
 
       p {
         text-align: center;
         font-size: 1.1em;
+        color: #333;
       }
 
+      /* ===== Search bar ===== */
       #searchInput {
         width: 60%;
         padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
+        border-radius: 10px;
+        border: 2px solid #ff5733;
         font-size: 1em;
       }
 
       #searchButton {
         padding: 10px 20px;
-        border-radius: 8px;
+        border-radius: 10px;
         border: none;
-        background-color: #ff6f61;
+        background-color: #ff7f50; /* bright orange */
         color: white;
         font-size: 1em;
         cursor: pointer;
         margin-left: 10px;
+        font-weight: bold;
       }
 
       #searchButton:hover {
-        background-color: #ff3b2f;
+        background-color: #ff4500; /* more vibrant on hover */
       }
 
+      /* ===== Results container ===== */
       #results {
         margin-top: 30px;
         display: flex;
@@ -52,44 +57,53 @@
         gap: 20px;
       }
 
+      /* ===== Book cards ===== */
       .book {
-        background-color: #fff3e0;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        background-color: #ffe0b2; /* soft bright orange */
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         padding: 15px;
         width: 200px;
         text-align: center;
-        transition: transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
       }
 
       .book:hover {
-        transform: scale(1.05);
+        transform: scale(1.08);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.25);
       }
 
       .book img {
         width: 120px;
         height: auto;
         margin-bottom: 10px;
-        border-radius: 5px;
+        border-radius: 8px;
       }
 
       .stars {
-        font-size: 1.2em;
-        color: #ffb400;
+        font-size: 1.4em;
+        color: #ffd700; /* bright gold for stars */
         cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <h1>📚 My Cozy Book Library 📚</h1>
+    <h1>📚 My Bright Book Library 📚</h1>
     <p>Search for any book and rate it!</p>
 
-    <div style="text-align:center;">
+    <div style="text-align:center; margin-bottom:20px;">
       <input type="text" id="searchInput" placeholder="Search for a book...">
       <button id="searchButton">Search</button>
     </div>
 
+    <!-- Results show up here -->
     <div id="results"></div>
+
+    <!-- Link to your JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>
+
 
     <script src="script.js"></script>
   </body>
