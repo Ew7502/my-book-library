@@ -47,25 +47,6 @@
         background-color: #ff4500;
       }
 
-      /* ===== Filter buttons ===== */
-      .filterButton {
-        padding: 8px 15px;
-        border: none;
-        border-radius: 8px;
-        margin: 0 5px;
-        cursor: pointer;
-        font-weight: bold;
-        background-color: #ffd700; /* gold */
-      }
-
-      .filterButton.active {
-        background-color: #ffc107; /* darker gold */
-      }
-
-      .filterButton:hover {
-        background-color: #ffc107;
-      }
-
       /* ===== Results container ===== */
       #results {
         margin-top: 20px;
@@ -117,22 +98,4 @@
     <p>Search for any book and rate it!</p>
 
     <!-- Search bar -->
-    <div style="text-align:center; margin-bottom:20px;">
-      <input type="text" id="searchInput" placeholder="Search for a book...">
-      <button id="searchButton">Search</button>
-    </div>
-
-    <!-- Filter buttons -->
-    <div style="text-align:center; margin-bottom:20px;">
-      <button class="filterButton" data-list="Want to Read">Want to Read</button>
-      <button class="filterButton" data-list="Reading">Reading</button>
-      <button class="filterButton" data-list="Read">Read</button>
-    </div>
-
-    <!-- Results show up here -->
-    <div id="results"></div>
-
-    <!-- Link to JavaScript -->
-    <script src="script.js"></script>
-  </body>
-</html>
+    <div style="te
