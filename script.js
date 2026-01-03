@@ -16,6 +16,7 @@ const listColors = {
   "Read": "#dda0dd"          // light purple
 };
 
+// === Search books ===
 document.getElementById("searchButton").addEventListener("click", function() {
   let query = document.getElementById("searchInput").value.trim();
   if (!query) return;
@@ -59,7 +60,7 @@ document.getElementById("searchButton").addEventListener("click", function() {
 
         resultsDiv.appendChild(bookDiv);
 
-        // Clickable stars
+        // === Clickable stars ===
         let starsSpan = bookDiv.querySelector(".stars");
         starsSpan.addEventListener("click", function() {
           let newRating = prompt("Enter your rating (1-5):");
@@ -73,12 +74,16 @@ document.getElementById("searchButton").addEventListener("click", function() {
           }
         });
 
-        // List selector saves and changes color
+        // === List selector saves and changes color ===
         let selector = bookDiv.querySelector(".listSelector");
         selector.addEventListener("change", function() {
           savedLists[bookId] = selector.value;
           localStorage.setItem("bookLists", JSON.stringify(savedLists));
           bookDiv.style.backgroundColor = listColors[selector.value];
+
+          // Reapply current filter so the card hides/shows automatically
+          const activeFilter = document.querySelector(".filterButton.active");
+          if (activeFilter) activeFilter.click();
         });
       });
     })
@@ -88,3 +93,18 @@ document.getElementById("searchButton").addEventListener("click", function() {
     });
 });
 
+// === Filter buttons ===
+document.querySelectorAll(".filterButton").forEach(button => {
+  button.addEventListener("click", () => {
+    const listName = button.getAttribute("data-list");
+
+    // Highlight the active filter
+    document.querySelectorAll(".filterButton").forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+
+    // Show/hide books based on selected list
+    document.querySelectorAll(".book").forEach(book => {
+      const selector = book.querySelector(".listSelector");
+      const bookList = selector.value;
+      if (listName === "All" || bookList === listName) {
+        book.style.
