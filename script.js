@@ -4,13 +4,14 @@ function getStars(rating) {
   return "★".repeat(rating) + "☆".repeat(5 - rating);
 }
 
-// Load saved ratings and lists from LocalStorage
+// Load saved ratings, lists, and book info from LocalStorage
 let savedRatings = JSON.parse(localStorage.getItem("bookRatings") || "{}");
 let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
+let savedBooks = JSON.parse(localStorage.getItem("bookData") || "{}"); // store title, author, cover
 
 // Mapping list names to colors
 const listColors = {
-  "None": "#fff8dc",         // default pale cream
+  "None": "#fff8dc",         // pale cream
   "Want to Read": "#add8e6", // light blue
   "Reading": "#90ee90",      // light green
   "Read": "#dda0dd"          // light purple
@@ -18,6 +19,14 @@ const listColors = {
 
 // Keep track of the current active filter
 let currentFilter = "All";
+
+// === Display all saved books on page load ===
+window.addEventListener("load", () => {
+  const resultsDiv = document.getElementById("results");
+  for (let bookId in savedBooks) {
+    createBookCard(savedBooks[bookId], bookId, resultsDiv);
+  }
+});
 
 // === Search books ===
 document.getElementById("searchButton").addEventListener("click", function() {
@@ -27,69 +36,26 @@ document.getElementById("searchButton").addEventListener("click", function() {
   fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
     .then(response => response.json())
     .then(data => {
-      let resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = ""; // clear previous results
+      if (!data.items) return;
 
-      if (!data.items) {
-        resultsDiv.innerHTML = "<p>No books found.</p>";
-        return;
-      }
+      let resultsDiv = document.getElementById("results");
 
       data.items.forEach(item => {
         let book = item.volumeInfo;
-        let cover = book.imageLinks ? book.imageLinks.thumbnail : "";
-        let bookId = item.id; // unique ID for this book
-        let rating = savedRatings[bookId] || 0;
-        let list = savedLists[bookId] || "None";
+        let bookId = item.id;
 
-        // Create book card
-        let bookDiv = document.createElement("div");
-        bookDiv.className = "book";
-        bookDiv.style.backgroundColor = listColors[list];
+        // Save book info for persistence
+        savedBooks[bookId] = {
+          title: book.title,
+          authors: book.authors || ["Unknown"],
+          cover: book.imageLinks ? book.imageLinks.thumbnail : ""
+        };
+        localStorage.setItem("bookData", JSON.stringify(savedBooks));
 
-        bookDiv.innerHTML = `
-          <img src="${cover}" alt="Cover">
-          <strong>${book.title}</strong><br>
-          by ${book.authors ? book.authors.join(", ") : "Unknown"}<br>
-          Your rating: <span class="stars">${getStars(rating)}</span><br><br>
-          List: 
-          <select class="listSelector">
-            <option${list === "None" ? " selected" : ""}>None</option>
-            <option${list === "Want to Read" ? " selected" : ""}>Want to Read</option>
-            <option${list === "Reading" ? " selected" : ""}>Reading</option>
-            <option${list === "Read" ? " selected" : ""}>Read</option>
-          </select>
-        `;
-
-        resultsDiv.appendChild(bookDiv);
-
-        // === Clickable stars ===
-        let starsSpan = bookDiv.querySelector(".stars");
-        starsSpan.addEventListener("click", function() {
-          let newRating = prompt("Enter your rating (1-5):");
-          newRating = parseInt(newRating);
-          if (newRating >= 1 && newRating <= 5) {
-            savedRatings[bookId] = newRating;
-            localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
-            starsSpan.textContent = getStars(newRating);
-          } else {
-            alert("Please enter a number between 1 and 5");
-          }
-        });
-
-        // === List selector saves, changes color, and applies filter ===
-        let selector = bookDiv.querySelector(".listSelector");
-        selector.addEventListener("change", function() {
-          savedLists[bookId] = selector.value;
-          localStorage.setItem("bookLists", JSON.stringify(savedLists));
-          bookDiv.style.backgroundColor = listColors[selector.value];
-
-          // Reapply current filter
-          applyFilter(currentFilter);
-        });
+        createBookCard(savedBooks[bookId], bookId, resultsDiv);
       });
 
-      // Apply current filter after new search
+      // Apply current filter after new books are added
       applyFilter(currentFilter);
     })
     .catch(err => {
@@ -97,6 +63,61 @@ document.getElementById("searchButton").addEventListener("click", function() {
       document.getElementById("results").innerHTML = "<p>Error fetching books.</p>";
     });
 });
+
+// === Create a book card ===
+function createBookCard(book, bookId, container) {
+  // Prevent duplicate cards
+  if (document.getElementById("book-" + bookId)) return;
+
+  let rating = savedRatings[bookId] || 0;
+  let list = savedLists[bookId] || "None";
+
+  let bookDiv = document.createElement("div");
+  bookDiv.className = "book";
+  bookDiv.id = "book-" + bookId;
+  bookDiv.style.backgroundColor = listColors[list];
+
+  bookDiv.innerHTML = `
+    <img src="${book.cover}" alt="Cover">
+    <strong>${book.title}</strong><br>
+    by ${book.authors.join(", ")}<br>
+    Your rating: <span class="stars">${getStars(rating)}</span><br><br>
+    List: 
+    <select class="listSelector">
+      <option${list === "None" ? " selected" : ""}>None</option>
+      <option${list === "Want to Read" ? " selected" : ""}>Want to Read</option>
+      <option${list === "Reading" ? " selected" : ""}>Reading</option>
+      <option${list === "Read" ? " selected" : ""}>Read</option>
+    </select>
+  `;
+
+  container.appendChild(bookDiv);
+
+  // === Clickable stars ===
+  let starsSpan = bookDiv.querySelector(".stars");
+  starsSpan.addEventListener("click", function() {
+    let newRating = prompt("Enter your rating (1-5):");
+    newRating = parseInt(newRating);
+    if (newRating >= 1 && newRating <= 5) {
+      savedRatings[bookId] = newRating;
+      localStorage.setItem("bookRatings", JSON.stringify(savedRatings));
+      starsSpan.textContent = getStars(newRating);
+    } else {
+      alert("Please enter a number between 1 and 5");
+    }
+  });
+
+  // === List selector saves, changes color, and applies filter ===
+  let selector = bookDiv.querySelector(".listSelector");
+  selector.addEventListener("change", function() {
+    savedLists[bookId] = selector.value;
+    localStorage.setItem("bookLists", JSON.stringify(savedLists));
+    bookDiv.style.backgroundColor = listColors[selector.value];
+
+    // Reapply current filter
+    applyFilter(currentFilter);
+  });
+}
 
 // === Filter buttons ===
 document.querySelectorAll(".filterButton").forEach(button => {
@@ -108,7 +129,6 @@ document.querySelectorAll(".filterButton").forEach(button => {
     document.querySelectorAll(".filterButton").forEach(btn => btn.classList.remove("active"));
     button.classList.add("active");
 
-    // Apply filter
     applyFilter(listName);
   });
 });
