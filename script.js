@@ -10,7 +10,7 @@ let savedLists = JSON.parse(localStorage.getItem("bookLists") || "{}");
 
 // Mapping list names to colors
 const listColors = {
-  "None": "#fff8dc",       // default pale cream
+  "None": "#fff8dc",         // default pale cream
   "Want to Read": "#add8e6", // light blue
   "Reading": "#90ee90",      // light green
   "Read": "#dda0dd"          // light purple
@@ -59,7 +59,7 @@ document.getElementById("searchButton").addEventListener("click", function() {
 
         resultsDiv.appendChild(bookDiv);
 
-        // Make stars clickable
+        // Clickable stars
         let starsSpan = bookDiv.querySelector(".stars");
         starsSpan.addEventListener("click", function() {
           let newRating = prompt("Enter your rating (1-5):");
@@ -73,7 +73,7 @@ document.getElementById("searchButton").addEventListener("click", function() {
           }
         });
 
-        // Make list selector saveable and color-coded
+        // List selector saves and changes color
         let selector = bookDiv.querySelector(".listSelector");
         selector.addEventListener("change", function() {
           savedLists[bookId] = selector.value;
