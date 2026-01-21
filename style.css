@@ -1,3 +1,20 @@
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #cceeff, #ffe0cc);
+    color: #333;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #ff5733;
+  }
+
+  ...
+
+
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #ffffff;
@@ -12,16 +29,23 @@ body {
   padding: 20px;
 }
 
-
-
 .book {
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px;
+  background-color: #fff8dc;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  padding: 15px;
   width: 200px;
-  display: inline-block;
-  vertical-align: top;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
 }
+
+.book:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+
 
 .heart {
   cursor: pointer;
