@@ -1,6 +1,16 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(
+    135deg,
+    #fdfbfb 0%,
+    #e6f3ff 50%,
+    #fff1e6 100%
+  );
+  color: #333;
+  margin: 0;
+  padding: 20px;
 }
+
 
 .book {
   border-radius: 10px;
