@@ -1,15 +1,14 @@
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(
-    135deg,
-    #fdfbfb 0%,
-    #e6f3ff 50%,
-    #fff1e6 100%
-  );
+  background-color: #f4f9ff;
+  background-image:
+    radial-gradient(circle at top left, #ffe6f0 0%, transparent 40%),
+    radial-gradient(circle at bottom right, #e6f2ff 0%, transparent 45%);
   color: #333;
   margin: 0;
   padding: 20px;
 }
+
 
 
 .book {
